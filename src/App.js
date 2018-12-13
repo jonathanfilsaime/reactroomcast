@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import axios from 'axios'
 import SockJsClient from 'react-stomp';
 import { TalkBox } from "react-talk";
 import './App.css';
@@ -28,16 +29,22 @@ class App extends Component {
     onMessageReceive = (msg, topic) => {
         console.log("this is the message", msg)
 
-        // this.setState({ messages: msg });
+        this.setState({ messages: msg });
     }
 
-    sendMessage = (msg) => {
-        try {
-            this.clientRef.sendMessage("/app/hello", JSON.stringify(msg));
-            return true;
-        } catch(e) {
-            return false;
-        }
+    // sendMessage = (msg) => {
+    //     try {
+    //         this.clientRef.sendMessage("/app/room/1", JSON.stringify(msg));
+    //         return true;
+    //     } catch(e) {
+    //         return false;
+    //     }
+    // }
+
+    create = () => {
+        axios.post("https://locahost:8080/create", { "description" : "testing it out"})
+            .then(response => {console.log(response.data)})
+            .catch(error => {console.log(error)})
     }
 
     handleChange(event) {
@@ -51,10 +58,11 @@ class App extends Component {
     }
 
   render() {
-    const wsSourceUrl = window.location.protocol + "//" + "localhost:8080" + "/gs-guide-websocket";
+    const wsSourceUrl = window.location.protocol + "//" + "localhost:8080" + "/websocket";
 
     return (
       <div>
+          {console.log("subscription : ", wsSourceUrl)}
           {/*<TalkBox topic="react-websocket-template" currentUserId={ this.randomUserId }*/}
                    {/*currentUser={ this.randomUserName } messages={ this.state.messages }*/}
                    {/*onSendMessage={ this.sendMessage } connected={ this.state.clientConnected }/>*/}
@@ -67,9 +75,9 @@ class App extends Component {
               <input type="submit" value="Submit" />
           </form>
 
-          <div>{this.state.messages}</div>
+          {/*<div>{this.state.messages.content}</div>*/}
 
-          <SockJsClient url={ wsSourceUrl } topics={["/topic/greetings"]}
+          <SockJsClient url={ wsSourceUrl } topics={["/room/message/1"]}
                         onMessage={ this.onMessageReceive } ref={ (client) => { this.clientRef = client }}
                         onConnect={ () => { this.setState({ clientConnected: true }) } }
                         onDisconnect={ () => { this.setState({ clientConnected: false }) } }
